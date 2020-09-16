@@ -13,32 +13,32 @@ import java.awt.*;
 
 public class MineMap extends JFrame {
 
-	public static MineMap INSTANCE;
-	public static boolean DARCULA = false;
+    public static MineMap INSTANCE;
+    public static boolean DARCULA = false;
 
-	private JMenuBar toolbarPane;
-	public WorldTabs worldTabs;
+    private JMenuBar toolbarPane;
+    public WorldTabs worldTabs;
 
-	public static void main(String[] args) {
-		Features.registerFeatures();
-		Icons.registerIcons();
-		Configs.registerConfigs();
+    public static void main(String[] args) {
+        Features.registerFeatures();
+        Icons.registerIcons();
+        Configs.registerConfigs();
 
-		INSTANCE = new MineMap();
-		INSTANCE.setVisible(true);
-	}
+        INSTANCE = new MineMap();
+        INSTANCE.setVisible(true);
+    }
 
-	public MineMap() {
-		try {
-			FlatLightLaf.install();
-			UIManager.setLookAndFeel(new FlatDarculaLaf());
-			DARCULA = true;
-		} catch (UnsupportedLookAndFeelException e) {
-			e.printStackTrace();
-		}
+    public MineMap() {
+        try {
+            FlatLightLaf.install();
+            UIManager.setLookAndFeel(new FlatDarculaLaf());
+            DARCULA = true;
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
 
-		BorderLayout layout = new BorderLayout();
-		this.setLayout(layout);
+        BorderLayout layout = new BorderLayout();
+        this.setLayout(layout);
 
 		this.initComponents();
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -49,12 +49,12 @@ public class MineMap extends JFrame {
 		System.out.println("Hello, its me");
 	}
 
-	private void initComponents() {
-		this.toolbarPane = new MenuBar();
-		this.add(this.toolbarPane, BorderLayout.NORTH);
+    private void initComponents() {
+        this.toolbarPane = new MenuBar();
+        this.add(this.toolbarPane, BorderLayout.NORTH);
 
-		this.worldTabs = new WorldTabs();
-		this.add(this.worldTabs);
-	}
+        this.worldTabs = new WorldTabs();
+        this.add(this.worldTabs);
+    }
 
 }
