@@ -11,9 +11,10 @@ import kaptainwutax.featureutils.structure.Shipwreck
 import kaptainwutax.featureutils.structure.OceanRuin
 import kaptainwutax.featureutils.misc.SlimeChunk
 import kaptainwutax.featureutils.structure.Mineshaft
+import kaptainwutax.minemap.feature.OWBastionRemnant
+import kaptainwutax.minemap.feature.OWFortress
 import kaptainwutax.minemap.ui.map.MapContext
 import java.awt.image.BufferedImage
-import kaptainwutax.minemap.MineMapScreenshooter
 import javax.imageio.ImageIO
 import java.io.File
 import kaptainwutax.minemap.ui.DrawInfo
@@ -22,10 +23,6 @@ import kaptainwutax.seedutils.mc.Dimension
 import krangl.DataFrame
 import krangl.asLongs
 import krangl.readCSV
-import org.apache.commons.csv.CSVFormat
-import org.apache.commons.csv.CSVRecord
-import java.io.FileReader
-import java.io.Reader
 
 object MineMapScreenshooter {
     @Throws(IOException::class)
@@ -35,18 +32,31 @@ object MineMapScreenshooter {
         Features.registerFeatures()
         Configs.registerConfigs()
         Icons.registerIcons()
-        val settings = MapSettings(MCVersion.v1_16_1, Dimension.OVERWORLD).refresh()
-        settings.hide(Shipwreck::class.java, OceanRuin::class.java, SlimeChunk::class.java, Mineshaft::class.java)
 
-        val csvName = "distances_all_structs_close"
+        val version = MCVersion.v1_16_1
+        val settings = MapSettings(version, Dimension.OVERWORLD).refresh()
+        Features.getForVersion(version)
+        val features2hide = Features.getForVersion(version).filter { !it.value.isValidDimension(Dimension.OVERWORLD) }.keys
+        features2hide.forEach { settings.hide(it)}
+        settings.hide(Shipwreck::class.java, OceanRuin::class.java, SlimeChunk::class.java, Mineshaft::class.java,
+                OWBastionRemnant::class.java, OWFortress::class.java)
+
+
+//        val csvName = "distances_all_structs_close"
+//        val csvName = "distances_all_structs_biomes_close"
+//        val csvName = "distances_village_mansion_igloo_desert_pyramid_swamp_hut_close"
+        val csvName = "distances_village_mansion_desert_pyramid_close"
+//        val csvName = "good_seeds_old_2\\distances_all_merged_top"
         val seedsDf = DataFrame.readCSV("E:\\Projects\\MinecraftSeedFinder\\${csvName}.csv")
         val seeds = seedsDf["seed"].asLongs()
-        seeds.forEach { seed->
+        seeds.forEach { seed ->
+            val outFile = File("E:\\Projects\\MinecraftSeedFinder\\${csvName}\\${seed}.png")
+            if (outFile.exists()) return@forEach
             val context = seed?.let { MapContext(it, settings) }
             val fragment = Fragment(-2048, -2048, 4096, context)
             val screenshot = getScreenShot(fragment, 1024, 1024)
             File("E:\\Projects\\MinecraftSeedFinder\\${csvName}").mkdir()
-            ImageIO.write(screenshot, "png", File("E:\\Projects\\MinecraftSeedFinder\\${csvName}\\${context?.worldSeed}.png"))
+            ImageIO.write(screenshot, "png", outFile)
         }
 
     }
