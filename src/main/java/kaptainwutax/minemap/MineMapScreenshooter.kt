@@ -2,6 +2,7 @@ package kaptainwutax.minemap
 
 import kaptainwutax.featureutils.misc.SlimeChunk
 import kaptainwutax.featureutils.structure.Mineshaft
+import kaptainwutax.featureutils.structure.NetherFossil
 import kaptainwutax.featureutils.structure.OceanRuin
 import kaptainwutax.featureutils.structure.Shipwreck
 import kaptainwutax.minemap.feature.OWBastionRemnant
@@ -19,14 +20,12 @@ import krangl.DataFrame
 import krangl.asLongs
 import krangl.readCSV
 import java.awt.Color
-import java.awt.Font
 import java.awt.font.TextAttribute
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.IOException
 import java.text.AttributedString
 import javax.imageio.ImageIO
-import javax.swing.JLabel
 
 object MineMapScreenshooter {
     @Throws(IOException::class)
@@ -39,12 +38,12 @@ object MineMapScreenshooter {
 
         val version = MCVersion.v1_16_1
         val settings = MapSettings(version, Dimension.OVERWORLD).refresh()
-        Features.getForVersion(version)
-        val features2hide = Features.getForVersion(version).filter { !it.value.isValidDimension(Dimension.OVERWORLD) }.keys
-        features2hide.forEach { settings.hide(it) }
+        val settingsNether = MapSettings(version, Dimension.NETHER).refresh()
+        Features.getForVersion(version).filter { !it.value.isValidDimension(Dimension.OVERWORLD) }.keys.forEach { settings.hide(it) }
         settings.hide(Shipwreck::class.java, OceanRuin::class.java, SlimeChunk::class.java, Mineshaft::class.java,
                 OWBastionRemnant::class.java, OWFortress::class.java)
-
+        Features.getForVersion(version).filter { !it.value.isValidDimension(Dimension.NETHER) }.keys.forEach { settingsNether.hide(it) }
+        settingsNether.hide(NetherFossil::class.java)
 
         val csvNames = listOf(
                 "distances_all_structs_close"
@@ -53,6 +52,7 @@ object MineMapScreenshooter {
                 , "distances_village_mansion_desert_pyramid_close"
 //                ,"good_seeds_old_2\\distances_all_merged_top"
         )
+
         csvNames.forEach { csvName ->
             val seedsDf = DataFrame.readCSV("E:\\Projects\\MinecraftSeedFinder\\${csvName}.csv")
             val seeds = seedsDf["seed"].asLongs()
@@ -61,6 +61,15 @@ object MineMapScreenshooter {
                 if (outFile.exists()) return@f
                 val context = MapContext(seed, settings)
                 val fragment = Fragment(-2048, -2048, 4096, context)
+                val screenshot = getScreenShot(fragment, 1024, 1024, seed)
+                File("E:\\Projects\\MinecraftSeedFinder\\${csvName}").mkdir()
+                ImageIO.write(screenshot, "png", outFile)
+            }
+            seeds.filterNotNull().forEach f@{ seed ->
+                val outFile = File("E:\\Projects\\MinecraftSeedFinder\\${csvName}\\${seed}_nether.png")
+                if (outFile.exists()) return@f
+                val context = MapContext(seed, settingsNether)
+                val fragment = Fragment(-1024, -1024, 2048, context)
                 val screenshot = getScreenShot(fragment, 1024, 1024, seed)
                 File("E:\\Projects\\MinecraftSeedFinder\\${csvName}").mkdir()
                 ImageIO.write(screenshot, "png", outFile)
